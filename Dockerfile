@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:18.04 as builder
 
 # Install Prerequisites
 
@@ -61,3 +61,24 @@ RUN git clone https://github.com/aws-samples/aws-iot-securetunneling-localproxy 
 	make
 
 WORKDIR aws-iot-securetunneling-localproxy/build/bin/
+
+## Actual docker image
+
+FROM ubuntu:18.04
+
+RUN apt update && apt upgrade -y && \
+	apt install -y openssl && \
+	rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
+
+RUN mkdir -p /home/aws-iot-securetunneling-localproxy && \
+	cd /home/aws-iot-securetunneling-localproxy
+
+WORKDIR /home/aws-iot-securetunneling-localproxy
+
+COPY --from=builder /home/dependencies/aws-iot-securetunneling-localproxy/build/bin/ ./
+
+
+
+
+
